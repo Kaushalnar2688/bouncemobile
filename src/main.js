@@ -876,6 +876,7 @@ function onOrientation(e) {
   }
 }
 
+
 function onMotion(e) {
   input.hasMotion = true;
 
@@ -885,11 +886,18 @@ function onMotion(e) {
   let ay = 0;
   let az = 0;
 
-  if (e.acceleration && e.acceleration.x !== null) {
+  // Prefer gravity-free acceleration when the device provides it.
+  if (
+    e.acceleration &&
+    e.acceleration.x !== null &&
+    e.acceleration.y !== null &&
+    e.acceleration.z !== null
+  ) {
     ax = e.acceleration.x || 0;
     ay = e.acceleration.y || 0;
     az = e.acceleration.z || 0;
   } else if (e.accelerationIncludingGravity) {
+    // Estimate gravity, then remove it to isolate walking movement.
     ax = e.accelerationIncludingGravity.x || 0;
     ay = e.accelerationIncludingGravity.y || 0;
     az = e.accelerationIncludingGravity.z || 0;
@@ -898,9 +906,9 @@ function onMotion(e) {
       input.gravity = { x: ax, y: ay, z: az };
     }
 
-    input.gravity.x = input.gravity.x * .92 + ax * .08;
-    input.gravity.y = input.gravity.y * .92 + ay * .08;
-    input.gravity.z = input.gravity.z * .92 + az * .08;
+    input.gravity.x += (ax - input.gravity.x) * 0.08;
+    input.gravity.y += (ay - input.gravity.y) * 0.08;
+    input.gravity.z += (az - input.gravity.z) * 0.08;
 
     ax -= input.gravity.x;
     ay -= input.gravity.y;
@@ -909,15 +917,24 @@ function onMotion(e) {
     return;
   }
 
+  // Calculate the strength of the movement.
   const magnitude = Math.sqrt(ax * ax + ay * ay + az * az);
 
-  input.stepEnergy = input.stepEnergy * .78 + magnitude * .22;
+  // Faster response so smaller walking movements are detected.
+  input.stepEnergy =
+    input.stepEnergy * 0.62 + magnitude * 0.38;
 
-  if (input.stepEnergy > 1.05 && input.stepCooldown <= 0) {
-    input.motionStride = Math.min(1, input.motionStride + .42);
-    input.stepCooldown = .30;
+  // Register steps with a lower threshold and shorter cooldown.
+  if (input.stepEnergy > 0.65 && input.stepCooldown <= 0) {
+    input.motionStride = Math.min(
+      1,
+      input.motionStride + 0.50
+    );
+
+    input.stepCooldown = 0.24;
   }
 }
+
 
 function setControlMode(mode) {
   input.mode = mode;
