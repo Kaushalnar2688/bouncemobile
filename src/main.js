@@ -3,7 +3,7 @@ import * as THREE from 'three';
 const $ = (id) => document.getElementById(id);
 const ui = {
   canvas: $('game-canvas'), menu: $('menu'), hud: $('hud'), pause: $('pause-screen'), end: $('end-screen'),
-  start: $('start-button'), pauseButton: $('pause-button'), resume: $('resume-button'), restart: $('restart-button'), again: $('again-button'),
+  start: $('start-button'), testMode: $('test-mode-button'), pauseButton: $('pause-button'), resume: $('resume-button'), restart: $('restart-button'), again: $('again-button'),
   objective: $('objective-text'), progress: $('objective-progress-fill'), count: $('objective-count'), noise: $('noise-fill'), noiseWord: $('noise-word'),
   toast: $('toast'), prompt: $('interact-prompt'), promptLabel: $('interact-label'), interact: $('interact-button'), hide: $('hide-button'), flash: $('flash-button'),
   joystick: $('joystick'), thumb: $('joy-thumb'), moveCaption: $('move-caption'), sensorStatus: $('sensor-status'), hidden: $('hidden-indicator'), warning: $('warning-flash'),
@@ -209,18 +209,29 @@ camera.add(flashlight);
 const flashTarget = new THREE.Object3D(); flashTarget.position.set(0,0,-1); camera.add(flashTarget); flashlight.target=flashTarget;
 const flashlightFill = new THREE.PointLight(0xffe8c4,1.2,4.2,2); flashlightFill.position.set(0,-.04,-.2); camera.add(flashlightFill);
 
-// The Bouncer: an unnaturally tall, dark figure roaming between the courts.
+// The Bouncer: a gaunt, warped human silhouette in a shredded staff uniform.
 const monster = new THREE.Group(); world.add(monster); monster.position.set(1.5,0,-4.7);
-const monsterMat = new THREE.MeshStandardMaterial({color:0x050708,roughness:1});
-const body = new THREE.Mesh(new THREE.CapsuleGeometry(.37,1.15,5,8),monsterMat); body.position.y=1.45; body.castShadow=true; monster.add(body);
-const head = new THREE.Mesh(new THREE.SphereGeometry(.34,12,10),monsterMat); head.position.y=2.42; head.scale.set(.8,1.08,.82); head.castShadow=true; monster.add(head);
-const neck = new THREE.Mesh(new THREE.CylinderGeometry(.12,.17,.33,8),monsterMat); neck.position.y=2.12; monster.add(neck);
-for (const side of [-1,1]) {
-  const arm = new THREE.Mesh(new THREE.CapsuleGeometry(.12,.8,4,6),monsterMat); arm.position.set(side*.47,1.44,.04); arm.rotation.z=side*-.16; monster.add(arm);
-  const leg = new THREE.Mesh(new THREE.CapsuleGeometry(.15,.72,4,6),monsterMat); leg.position.set(side*.19,.55,0); monster.add(leg);
-  const eye = new THREE.Mesh(new THREE.SphereGeometry(.052,8,8),mats.eye); eye.position.set(side*.12,2.47,-.275); monster.add(eye);
+const shadowSkin = new THREE.MeshStandardMaterial({color:0x080909,roughness:1});
+const ragged = new THREE.MeshStandardMaterial({color:0x111514,roughness:1,side:THREE.DoubleSide});
+const bone = new THREE.MeshStandardMaterial({color:0xaaa58e,roughness:.9});
+const mouthMat = new THREE.MeshStandardMaterial({color:0x020202,roughness:1});
+const torso = new THREE.Mesh(new THREE.CapsuleGeometry(.31,.92,5,7),shadowSkin);torso.position.set(0,1.45,0);torso.rotation.x=-.16;torso.scale.set(.82,1.18,.72);torso.castShadow=true;monster.add(torso);
+const hunchedBack = new THREE.Mesh(new THREE.SphereGeometry(.42,10,8),ragged);hunchedBack.position.set(0,1.72,.12);hunchedBack.scale.set(1.05,1.35,.7);monster.add(hunchedBack);
+const skull = new THREE.Mesh(new THREE.SphereGeometry(.29,12,10),shadowSkin);skull.position.set(0,2.42,-.08);skull.scale.set(.78,1.32,.72);skull.castShadow=true;monster.add(skull);
+const jaw = new THREE.Mesh(new THREE.ConeGeometry(.2,.35,7),mouthMat);jaw.position.set(0,2.18,-.25);jaw.rotation.x=Math.PI;monster.add(jaw);
+const mouth = new THREE.Mesh(new THREE.BoxGeometry(.2,.12,.035),mouthMat);mouth.position.set(0,2.31,-.282);monster.add(mouth);
+for(let i=0;i<5;i++){const tooth=new THREE.Mesh(new THREE.ConeGeometry(.025,.09,5),bone);tooth.position.set(-.075+i*.037,2.33,-.31);tooth.rotation.x=Math.PI;monster.add(tooth);}
+for(const side of [-1,1]){
+  const eyeSocket=new THREE.Mesh(new THREE.SphereGeometry(.075,8,7),mouthMat);eyeSocket.position.set(side*.105,2.48,-.275);monster.add(eyeSocket);
+  const eye=new THREE.Mesh(new THREE.SphereGeometry(.027,8,8),mats.eye);eye.position.set(side*.105,2.48,-.34);monster.add(eye);
+  const arm=new THREE.Mesh(new THREE.CapsuleGeometry(.105,.92,4,6),shadowSkin);arm.position.set(side*.39,1.43,-.015);arm.rotation.z=side*-.24;arm.rotation.x=-.12;arm.castShadow=true;monster.add(arm);
+  const hand=new THREE.Mesh(new THREE.SphereGeometry(.13,8,7),shadowSkin);hand.position.set(side*.48,.89,-.06);hand.scale.set(.75,1.25,.65);monster.add(hand);
+  for(let c=0;c<3;c++){const claw=new THREE.Mesh(new THREE.ConeGeometry(.027,.22,5),bone);claw.position.set(side*(.48+(c-1)*.07),.72,-.1);claw.rotation.x=Math.PI*.82;monster.add(claw);}
+  const leg=new THREE.Mesh(new THREE.CapsuleGeometry(.12,.8,4,6),shadowSkin);leg.position.set(side*.17,.52,.04);leg.rotation.z=side*.08;monster.add(leg);
 }
-const monsterAura = new THREE.PointLight(0x7e0709,.25,2.3,2); monsterAura.position.set(0,2.2,0); monster.add(monsterAura);
+// Long strips of torn fabric break up the silhouette; no smooth robot-like plating.
+for(let i=0;i<7;i++){const strip=new THREE.Mesh(new THREE.ConeGeometry(.12+Math.random()*.08,.75+Math.random()*.45,5,1,true),ragged);strip.position.set((Math.random()-.5)*.5,.95+Math.random()*.55,.16);strip.rotation.z=(Math.random()-.5)*.55;monster.add(strip);}
+const monsterAura = new THREE.PointLight(0x7e0709,.18,2.3,2);monsterAura.position.set(0,2.2,0);monster.add(monsterAura);
 const monsterState = { mode:'patrol', target:new THREE.Vector3(0,0,5), alert:0, stun:0, step:0, lastKnown:new THREE.Vector3(0,0,0) };
 const patrolPoints=[new THREE.Vector3(1.5,0,-4.7),new THREE.Vector3(-12,0,-5),new THREE.Vector3(-12,0,10),new THREE.Vector3(12,0,10),new THREE.Vector3(12,0,-5)];
 let patrolIndex=1;
@@ -247,11 +258,12 @@ function noiseSound(duration=.18,volume=.07){
 }
 
 // Sensor and touch input state.
-const input={mode:'touch',orientationReady:false,motionReady:false,hasOrientation:false,hasMotion:false,baseAlpha:null,baseBeta:null,lastAlpha:null,yawOffset:0,pitchOffset:0,stepBaseline:9.81,lastStepValue:0,lastStepTime:0,joyX:0,joyY:0,joyActive:false,lookPointer:null,lastLookX:0,lastLookY:0,interact:false};
+const input={mode:'touch',orientationReady:false,motionReady:false,hasOrientation:false,hasMotion:false,baseAlpha:null,baseBeta:null,lastAlpha:null,yawOffset:0,pitchOffset:0,targetYaw:0,targetPitch:0,filteredYaw:null,filteredPitch:null,gravity:null,stepEnergy:0,stepCooldown:0,motionStride:0,joyX:0,joyY:0,joyActive:false,lookPointer:null,lastLookX:0,lastLookY:0,interact:false};
+let testMode=false;
 function wrapAngle(a){while(a>180)a-=360;while(a< -180)a+=360;return a;}
 function calibrate(){
   if(input.lastAlpha!==null) input.baseAlpha=input.lastAlpha;
-  input.baseBeta=input.lastBeta??90; input.yawOffset=player.yaw; input.pitchOffset=player.pitch;
+  input.baseBeta=input.lastBeta??90; input.yawOffset=player.yaw; input.pitchOffset=player.pitch;input.targetYaw=player.yaw;input.targetPitch=player.pitch;input.filteredYaw=player.yaw;input.filteredPitch=player.pitch;
   toast('AIM RECALIBRATED');
 }
 let lastBeta=null;
@@ -260,30 +272,30 @@ function onOrientation(e){
   input.hasOrientation=true;input.lastAlpha=e.alpha;input.lastBeta=e.beta;
   if(input.baseAlpha===null){input.baseAlpha=e.alpha;input.baseBeta=e.beta;input.yawOffset=player.yaw;input.pitchOffset=player.pitch;}
   if(input.mode==='motion'){
-    const da=wrapAngle(e.alpha-input.baseAlpha);
-    const db=wrapAngle(e.beta-input.baseBeta);
-    player.yaw=input.yawOffset-THREE.MathUtils.degToRad(da);
-    player.pitch=THREE.MathUtils.clamp(input.pitchOffset-THREE.MathUtils.degToRad(db)*.88,-1.05,1.05);
+    // Relative, calibrated phone movement. Keep the phone upright; turn your body to look.
+    const yawDelta=wrapAngle(e.alpha-input.baseAlpha);
+    const pitchDelta=THREE.MathUtils.clamp(e.beta-input.baseBeta,-65,65);
+    input.targetYaw=input.yawOffset-THREE.MathUtils.degToRad(yawDelta)*0.82;
+    input.targetPitch=THREE.MathUtils.clamp(input.pitchOffset-THREE.MathUtils.degToRad(pitchDelta)*0.72,-.82,.82);
   }
 }
 function onMotion(e){
   input.hasMotion=true;
-  if(input.mode!=='motion'||player.hidden||!gameRunning)return;
-  let ax,ay,az;
+  if(input.mode!=='motion'||player.hidden||!gameRunning||paused)return;
+  let ax=0,ay=0,az=0;
   if(e.acceleration && e.acceleration.x!==null){ax=e.acceleration.x||0;ay=e.acceleration.y||0;az=e.acceleration.z||0;}
   else if(e.accelerationIncludingGravity){
     ax=e.accelerationIncludingGravity.x||0;ay=e.accelerationIncludingGravity.y||0;az=e.accelerationIncludingGravity.z||0;
-    // High-pass the gravity vector to estimate the footstep impulse.
-    if(!input.gravity){input.gravity={x:ax,y:ay,z:az};}
-    input.gravity.x=input.gravity.x*.92+ax*.08;input.gravity.y=input.gravity.y*.92+ay*.08;input.gravity.z=input.gravity.z*.92+az*.08;
+    if(!input.gravity)input.gravity={x:ax,y:ay,z:az};
+    input.gravity.x=input.gravity.x*.94+ax*.06;input.gravity.y=input.gravity.y*.94+ay*.06;input.gravity.z=input.gravity.z*.94+az*.06;
     ax-=input.gravity.x;ay-=input.gravity.y;az-=input.gravity.z;
   } else return;
   const magnitude=Math.sqrt(ax*ax+ay*ay+az*az);
+  // Smooth sensor spikes, then translate repeated walking pulses into steady forward motion.
+  input.stepEnergy=input.stepEnergy*.72+magnitude*.28;
   const now=performance.now();
-  if(magnitude>1.45 && input.lastStepValue<=1.45 && now-input.lastStepTime>300){
-    input.lastStepTime=now;stepForward();
-  }
-  input.lastStepValue=magnitude;
+  if(input.stepEnergy>1.25&&input.stepCooldown<=0){input.motionStride=Math.min(1,input.motionStride+.48);input.stepCooldown=.24;}
+  input.stepCooldown=Math.max(0,input.stepCooldown-.016);
 }
 function setControlMode(mode){
   input.mode=mode;
@@ -346,7 +358,7 @@ function toggleFlashlight(){player.flashlightOn=!player.flashlightOn;flashlight.
 function startGame(){
   if(gameEnded)resetGame();
   initAudio();gameRunning=true;paused=false;gameEnded=false;ui.menu.classList.add('hidden');ui.pause.classList.add('hidden');ui.end.classList.add('hidden');ui.hud.classList.remove('hidden');
-  player.alive=true;player.position.set(0,1.67,14.3);player.yaw=0;player.pitch=0;camera.position.copy(player.position);camera.rotation.set(0,0,0);setNoise(0);updateObjective();
+  player.alive=true;player.position.set(0,1.67,14.3);monster.visible=!testMode;monsterState.mode='patrol';player.yaw=0;player.pitch=0;camera.position.copy(player.position);camera.rotation.set(0,0,0);setNoise(0);updateObjective();
   toast('FIND THE BACKUP FUSES');
 }
 function pauseGame(){if(!gameRunning||gameEnded)return;paused=true;ui.pause.classList.remove('hidden');}
@@ -387,6 +399,11 @@ function updateJoystick(){
   const max=35;const x=input.joyX*max,y=input.joyY*max;ui.thumb.style.transform=`translate(${x}px,${y}px)`;
 }
 function useJoystickMove(dt){
+  if(input.mode==='motion'&&!player.hidden&&gameRunning&&!paused&&!testMode){
+    input.motionStride=Math.max(0,input.motionStride-dt*.95);
+    const motionSpeed=input.motionStride;
+    if(motionSpeed>.025){const distance=dt*2.05*motionSpeed;movePlayer(-Math.sin(player.yaw)*distance,-Math.cos(player.yaw)*distance);player.moving=true;player.lastMove=performance.now();setNoise(Math.min(1,player.noise+dt*.035*motionSpeed));}
+  }
   if(!input.joyActive||player.hidden)return;
   const magnitude=Math.hypot(input.joyX,input.joyY);if(magnitude<.12)return;
   const forward=-input.joyY,side=input.joyX;
@@ -396,6 +413,7 @@ function useJoystickMove(dt){
   movePlayer(dx,dz);setNoise(Math.min(1,player.noise+dt*(magnitude>.75?.1:.045)));
 }
 function updateMonster(dt){
+  if(testMode){monster.visible=false;return;}
   if(monsterState.stun>0){monsterState.stun-=dt;monster.position.y=.06*Math.sin(performance.now()*.03);return;}
   const distance=monster.position.distanceTo(new THREE.Vector3(player.position.x,0,player.position.z));
   if(!player.hidden && (distance<9 || player.noise>.27)){
@@ -433,6 +451,12 @@ function updatePrompt(){
   ui.hide.style.opacity=(hidingSpots.some(s=>player.position.distanceTo(new THREE.Vector3(s.position.x,player.position.y,s.position.z))<1.7)||player.hidden)?'1':'.55';
 }
 function updateCamera(){
+  if(input.mode==='motion'&&input.hasOrientation){
+    const smooth=.16;
+    const yawError=Math.atan2(Math.sin(input.targetYaw-player.yaw),Math.cos(input.targetYaw-player.yaw));
+    player.yaw+=yawError*smooth;
+    player.pitch=THREE.MathUtils.clamp(player.pitch+(input.targetPitch-player.pitch)*smooth,-.82,.82);
+  }
   camera.position.set(player.position.x,player.position.y+player.bounce,player.position.z);
   camera.rotation.order='YXZ';camera.rotation.y=player.yaw;camera.rotation.x=player.pitch;
   flashlight.intensity=player.flashlightOn?(player.battery<20?42:62):0;
@@ -458,9 +482,10 @@ function endJoy(){input.joyActive=false;input.joyX=0;input.joyY=0;ui.thumb.style
 ui.joystick.addEventListener('pointerup',endJoy);ui.joystick.addEventListener('pointercancel',endJoy);ui.joystick.addEventListener('lostpointercapture',endJoy);
 function updateJoyFromEvent(e){const r=ui.joystick.getBoundingClientRect();let x=(e.clientX-(r.left+r.width/2))/(r.width*.36),y=(e.clientY-(r.top+r.height/2))/(r.height*.36);const m=Math.hypot(x,y);if(m>1){x/=m;y/=m;}input.joyX=x;input.joyY=y;updateJoystick();}
 ui.canvas.addEventListener('pointerdown',e=>{if(!gameRunning||paused)return;input.lookPointer=e.pointerId;input.lastLookX=e.clientX;input.lastLookY=e.clientY;ui.canvas.setPointerCapture(e.pointerId);});
-ui.canvas.addEventListener('pointermove',e=>{if(input.lookPointer!==e.pointerId)return;const dx=e.clientX-input.lastLookX,dy=e.clientY-input.lastLookY;input.lastLookX=e.clientX;input.lastLookY=e.clientY;player.yaw-=dx*.006;player.pitch=THREE.MathUtils.clamp(player.pitch-dy*.005,-1.05,1.05);});
+ui.canvas.addEventListener('pointermove',e=>{if(input.lookPointer!==e.pointerId)return;const dx=e.clientX-input.lastLookX,dy=e.clientY-input.lastLookY;input.lastLookX=e.clientX;input.lastLookY=e.clientY;player.yaw-=dx*.0038;player.pitch=THREE.MathUtils.clamp(player.pitch-dy*.0034,-.82,.82);input.targetYaw=player.yaw;input.targetPitch=player.pitch;});
 function endLook(){input.lookPointer=null;}ui.canvas.addEventListener('pointerup',endLook);ui.canvas.addEventListener('pointercancel',endLook);
 ui.start.addEventListener('click',()=>ui.permission.classList.remove('hidden'));
+ui.testMode.addEventListener('click',()=>{testMode=!testMode;ui.testMode.classList.toggle('selected',testMode);ui.testMode.textContent=testMode?'TEST MODE: ON':'TEST MODE: OFF';monster.visible=!testMode;toast(testMode?'SAFE TEST MODE ENABLED':'HORROR MODE ENABLED');});
 ui.enableMotion.addEventListener('click',async()=>{const ok=await requestSensors();ui.permission.classList.add('hidden');if(!ok)toast('MOTION UNAVAILABLE — TOUCH MODE');startGame();});
 ui.touchMode.addEventListener('click',()=>{setControlMode('touch');ui.permission.classList.add('hidden');startGame();});
 ui.sensorStatus.addEventListener('click',()=>{if(input.mode==='motion')setControlMode('touch');else if(input.orientationReady&&input.motionReady){setControlMode('motion');calibrate();}else toast('MOTION SENSORS NOT AVAILABLE');});
