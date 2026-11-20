@@ -1447,7 +1447,7 @@ function updateJoystick() {
 function useJoystickMove(dt) {
   if (input.mode === 'motion' && !player.hidden && gameRunning && !paused) {
     input.stepCooldown = Math.max(0, input.stepCooldown - dt);
-    input.motionStride = Math.max(0, input.motionStride - dt * 1.35);
+   input.motionStride = Math.max(0, input.motionStride - dt * 0.85);
 
     const motionSpeed = input.motionStride;
 
