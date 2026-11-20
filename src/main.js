@@ -866,7 +866,7 @@ function onOrientation(e) {
     const pitchDelta = THREE.MathUtils.clamp(e.beta - input.baseBeta, -55, 55);
     const rollDelta = THREE.MathUtils.clamp(e.gamma || 0, -35, 35);
 
-    input.targetYaw = input.yawOffset - THREE.MathUtils.degToRad(yawDelta) * .95;
+    input.targetYaw = input.yawOffset + THREE.MathUtils.degToRad(yawDelta) * .95;
 
     input.targetPitch = THREE.MathUtils.clamp(
       input.pitchOffset - THREE.MathUtils.degToRad(pitchDelta + rollDelta * .12) * .82,
