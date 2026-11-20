@@ -1782,7 +1782,7 @@ ui.canvas.addEventListener('pointermove', e => {
   input.lastLookX = e.clientX;
   input.lastLookY = e.clientY;
 
-  player.yaw -= dx * .0038;
+  player.yaw += dx * .0038;
 
   player.pitch = THREE.MathUtils.clamp(
     player.pitch - dy * .0034,
