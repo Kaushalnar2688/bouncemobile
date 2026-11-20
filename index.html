@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -14,7 +15,6 @@
 <body>
   <main id="game-root">
     <canvas id="game-canvas" aria-label="3D game view"></canvas>
-
     <div id="vignette"></div>
     <div id="film-grain"></div>
 
@@ -23,11 +23,14 @@
       <div class="menu-title">ONE MORE<br><span>BOUNCE</span></div>
       <div class="menu-rule"></div>
       <p class="menu-copy">The doors locked at 11:47 PM.<br>Something is still bouncing.</p>
+
       <div class="briefing">
         <div><b>YOUR SHIFT</b><span>Find 3 fuses. Restore the exit power. Get out.</span></div>
         <div><b>DON'T MAKE NOISE</b><span>The Bouncer hears every landing.</span></div>
       </div>
+
       <button id="start-button" class="primary-button">ENTER JUMPZONE <span>↗</span></button>
+      <button id="test-mode-button" class="secondary-button test-mode-button" type="button">TEST MODE: OFF</button>
       <p id="sensor-note" class="sensor-note">Motion controls will be requested when you start. Touch controls are always available.</p>
       <div class="menu-footer"><span>PORTRAIT MOBILE EDITION</span><span>V 1.0</span></div>
     </section>
@@ -52,32 +55,44 @@
         <div class="brand-mark"><span class="brand-dot"></span> JUMPZONE <small>11:47 PM</small></div>
         <button id="pause-button" class="round-button" aria-label="Pause">Ⅱ</button>
       </header>
+
       <div class="objective-card">
         <div class="eyebrow">CURRENT OBJECTIVE</div>
         <div id="objective-text">Find the 3 backup fuses</div>
         <div class="objective-progress"><div id="objective-progress-fill"></div></div>
         <div id="objective-count">FUSES 0 / 3</div>
       </div>
+
       <div class="noise-card">
         <div class="noise-label"><span>NOISE LEVEL</span><span id="noise-word">QUIET</span></div>
         <div class="noise-track"><div id="noise-fill"></div></div>
       </div>
+
       <div id="toast" class="toast"></div>
-      <div id="interact-prompt" class="interact-prompt hidden"> <span class="prompt-key">USE</span><span id="interact-label">Pick up fuse</span></div>
+      <div id="interact-prompt" class="interact-prompt hidden">
+        <span class="prompt-key">USE</span><span id="interact-label">Pick up fuse</span>
+      </div>
+
       <button id="sensor-status" class="sensor-status" type="button">⌁ TOUCH CONTROL · TAP TO SWITCH</button>
       <div class="reticle"><i></i></div>
 
       <div class="controls">
         <div class="move-zone">
-          <div id="joystick" class="joystick"><div class="joy-ring"></div><div id="joy-thumb" class="joy-thumb"></div><span>MOVE</span></div>
+          <div id="joystick" class="joystick">
+            <div class="joy-ring"></div>
+            <div id="joy-thumb" class="joy-thumb"></div>
+            <span>MOVE</span>
+          </div>
           <div class="move-caption" id="move-caption">WALK IN PLACE</div>
         </div>
+
         <div class="action-zone">
           <button id="flash-button" class="control-button flashlight-button"><span class="control-icon">✦</span><small>LIGHT ON</small></button>
           <button id="interact-button" class="control-button interact-button"><span class="control-icon">◎</span><small>USE</small></button>
           <button id="hide-button" class="control-button hide-button"><span class="control-icon">▣</span><small>HIDE</small></button>
         </div>
       </div>
+
       <div id="hidden-indicator" class="hidden-indicator hidden">HOLD STILL. DON'T BREATHE.</div>
       <div id="warning-flash" class="warning-flash hidden">IT HEARD THAT</div>
     </div>
@@ -96,6 +111,7 @@
     <div id="calibration-hint" class="calibration-hint hidden">HOLD PHONE FORWARD · TAP TO RECALIBRATE</div>
     <button id="calibrate-button" class="calibrate-button hidden">◎ RECALIBRATE</button>
   </main>
+
   <script type="module" src="./src/main.js"></script>
 </body>
 </html>
